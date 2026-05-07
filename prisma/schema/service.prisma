@@ -1,0 +1,13 @@
+// ─── SERVICE ─────────────────────────────────────────────────────
+// Lookup table: medical services offered by facilities.
+
+model Service {
+  id          BigInt  @id @default(autoincrement())
+  name        String  @db.VarChar(191)
+  category    String? @db.VarChar(100)
+  description String? @db.Text
+
+  facilities FacilityService[]
+
+  @@map("services")
+}

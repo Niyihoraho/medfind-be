@@ -1,0 +1,15 @@
+// ─── DISTRICT ────────────────────────────────────────────────────
+// Second-level administrative unit, belongs to a Province.
+
+model District {
+  id         BigInt  @id @default(autoincrement())
+  name       String  @db.VarChar(191)
+  nameRw     String? @map("name_rw") @db.VarChar(191)
+  provinceId BigInt  @map("province_id")
+
+  province Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+  sectors  Sector[]
+
+  @@index([provinceId], name: "fk_district_province")
+  @@map("districts")
+}

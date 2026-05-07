@@ -1,0 +1,14 @@
+// ─── FACILITY INSURANCE ──────────────────────────────────────────
+// Junction table: which insurance schemes a facility accepts.
+
+model FacilityInsurance {
+  id          BigInt @id @default(autoincrement())
+  facilityId  BigInt @map("facility_id")
+  insuranceId BigInt @map("insurance_id")
+
+  facility  Facility        @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  insurance InsuranceScheme @relation(fields: [insuranceId], references: [id], onDelete: Cascade)
+
+  @@unique([facilityId, insuranceId], name: "unique_facility_insurance")
+  @@map("facility_insurances")
+}

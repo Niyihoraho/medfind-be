@@ -1,0 +1,37 @@
+// ─── FACILITY ────────────────────────────────────────────────────
+// Core entity: a healthcare facility (hospital, clinic, etc.)
+// Only verified facilities appear in public search results.
+
+model Facility {
+  id           BigInt       @id @default(autoincrement())
+  name         String       @db.VarChar(191)
+  type         FacilityType
+  address      String?      @db.VarChar(255)
+  latitude     Decimal?     @db.Decimal(10, 8)
+  longitude    Decimal?     @db.Decimal(11, 8)
+  sectorId     BigInt       @map("sector_id")
+  cellId       BigInt?      @map("cell_id")
+  villageId    BigInt?      @map("village_id")
+  phone        String?      @db.VarChar(20)
+  email        String?      @db.VarChar(191)
+  openingHours Json?        @map("opening_hours")
+  isVerified     Boolean      @default(false) @map("is_verified")
+  isPartner      Boolean      @default(false) @map("is_partner")
+  imageUrl       String?      @map("image_url") @db.VarChar(512)
+  category       OwnershipType @default(public)
+  organizationId BigInt?      @map("organization_id")
+  createdAt      DateTime?    @default(now()) @map("created_at")
+  updatedAt      DateTime?    @updatedAt @map("updated_at")
+
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  sector         Sector              @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  cell           Cell?               @relation(fields: [cellId], references: [id])
+  village        Village?            @relation(fields: [villageId], references: [id])
+  services     FacilityService[]
+  insurances   FacilityInsurance[]
+  admins       FacilityAdmin[]
+  appointments Appointment[]
+
+  @@index([sectorId], name: "fk_facility_sector")
+  @@map("facilities")
+}

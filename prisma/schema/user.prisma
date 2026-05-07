@@ -1,0 +1,19 @@
+// ─── USER ────────────────────────────────────────────────────────
+// Platform users: patients, facility admins, and super admins.
+
+model User {
+  id                BigInt   @id @default(autoincrement())
+  fullName          String   @map("full_name") @db.VarChar(191)
+  email             String   @unique @db.VarChar(191)
+  phone             String?  @db.VarChar(20)
+  password          String   @db.VarChar(255)
+  role              UserRole @default(patient)
+  preferredLanguage Language @default(en) @map("preferred_language")
+  createdAt         DateTime? @default(now()) @map("created_at")
+  updatedAt         DateTime? @updatedAt @map("updated_at")
+
+  appointments   Appointment[]
+  facilityAdmins FacilityAdmin[]
+
+  @@map("users")
+}

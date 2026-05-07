@@ -1,0 +1,21 @@
+// ─── APPOINTMENT ─────────────────────────────────────────────────
+// Feature table: appointment booking by patients at facilities.
+// Business rule: no duplicate appointments (same user + facility + date)
+// enforced at application layer.
+
+model Appointment {
+  id              BigInt            @id @default(autoincrement())
+  userId          BigInt            @map("user_id")
+  facilityId      BigInt            @map("facility_id")
+  serviceName     String?           @map("service_name") @db.VarChar(191)
+  appointmentDate DateTime          @map("appointment_date")
+  status          AppointmentStatus @default(pending)
+  notes           String?           @db.Text
+  createdAt       DateTime?         @default(now()) @map("created_at")
+  updatedAt       DateTime?         @updatedAt @map("updated_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  @@map("appointments")
+}

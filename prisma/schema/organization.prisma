@@ -1,0 +1,17 @@
+// ─── ORGANIZATION ───────────────────────────────────────────────
+// Parent entity for grouping multiple facilities (e.g., a hospital network or company)
+
+model Organization {
+  id            BigInt        @id @default(autoincrement())
+  name          String        @db.VarChar(191)
+  email         String?       @db.VarChar(191)
+  phone         String?       @db.VarChar(20)
+  ownershipType OwnershipType @default(private) @map("ownership_type")
+  createdAt     DateTime?     @default(now()) @map("created_at")
+  updatedAt     DateTime?     @updatedAt @map("updated_at")
+
+  facilities Facility[]
+  insurances OrganizationInsurance[]
+
+  @@map("organizations")
+}

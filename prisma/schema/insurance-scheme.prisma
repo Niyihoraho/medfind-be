@@ -1,0 +1,14 @@
+// ─── INSURANCE SCHEME ────────────────────────────────────────────
+// Lookup table: insurance schemes accepted by facilities.
+
+model InsuranceScheme {
+  id          BigInt        @id @default(autoincrement())
+  name        String        @db.VarChar(191)
+  type        InsuranceType
+  description String?       @db.Text
+
+  facilities    FacilityInsurance[]
+  organizations OrganizationInsurance[]
+
+  @@map("insurance_schemes")
+}

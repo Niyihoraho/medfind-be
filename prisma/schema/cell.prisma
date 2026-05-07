@@ -1,0 +1,17 @@
+// ─── CELL ────────────────────────────────────────────────────────
+// Fourth-level administrative unit, belongs to a Sector.
+// Contains multiple Villages.
+
+model Cell {
+  id         BigInt  @id @default(autoincrement())
+  name       String  @db.VarChar(191)
+  nameRw     String? @map("name_rw") @db.VarChar(191)
+  sectorId   BigInt  @map("sector_id")
+
+  sector     Sector     @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  villages   Village[]
+  facilities Facility[]
+
+  @@index([sectorId], name: "fk_cell_sector")
+  @@map("cells")
+}

@@ -1,0 +1,54 @@
+// ─── SHARED ENUMS ────────────────────────────────────────────────
+// All enums used across multiple models are defined here.
+
+enum FacilityType {
+  hospital
+  health_center
+  clinic
+  dispensary
+  polyclinic
+}
+
+enum UserRole {
+  patient
+  facility_admin
+  super_admin
+}
+
+enum Language {
+  en
+  rw
+  fr
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  cancelled
+  completed
+}
+
+enum InsuranceType {
+  public
+  private
+  international
+}
+
+enum PlaceType {
+  province
+  district
+  sector
+  cell
+  village
+}
+
+enum FacilityAdminRole {
+  owner
+  editor
+}
+
+enum OwnershipType {
+  public
+  private
+  ngo
+}

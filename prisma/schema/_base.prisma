@@ -1,0 +1,13 @@
+// ─── BASE CONFIGURATION ──────────────────────────────────────────
+// This file contains the datasource and generator configuration.
+// All other .prisma files in this folder define individual models.
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}

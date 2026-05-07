@@ -1,0 +1,13 @@
+// ─── ORGANIZATION INSURANCE ──────────────────────────────────────────
+// Join table: insurance schemes accepted by an organization and all its facilities.
+
+model OrganizationInsurance {
+  organizationId BigInt @map("organization_id")
+  insuranceId    BigInt @map("insurance_id")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  insurance    InsuranceScheme @relation(fields: [insuranceId], references: [id], onDelete: Cascade)
+
+  @@id([organizationId, insuranceId], name: "unique_organization_insurance")
+  @@map("organization_insurances")
+}

@@ -1,0 +1,12 @@
+// ─── PROVINCE ────────────────────────────────────────────────────
+// Top-level administrative geography unit in Rwanda (5 provinces).
+
+model Province {
+  id      BigInt  @id @default(autoincrement())
+  name    String  @db.VarChar(191)
+  nameRw  String? @map("name_rw") @db.VarChar(191)
+
+  districts District[]
+
+  @@map("provinces")
+}
