@@ -33,6 +33,9 @@ app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:3000',
     'https://medfind-fe.vercel.app',
+    'https://medfind-dboard.vercel.app',
+    'https://medfind-dashboard.vercel.app',
+    'https://medfind-dashboard-vshk.vercel.app',
     'http://localhost:3001',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
