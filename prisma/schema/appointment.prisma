@@ -5,16 +5,19 @@
 
 model Appointment {
   id              BigInt            @id @default(autoincrement())
-  userId          BigInt            @map("user_id")
+  userId          BigInt?           @map("user_id")
   facilityId      BigInt            @map("facility_id")
   serviceName     String?           @map("service_name") @db.VarChar(191)
   appointmentDate DateTime          @map("appointment_date")
   status          AppointmentStatus @default(pending)
   notes           String?           @db.Text
+  patientName     String?           @map("patient_name") @db.VarChar(191)
+  patientEmail    String?           @map("patient_email") @db.VarChar(191)
+  patientPhone    String?           @map("patient_phone") @db.VarChar(50)
   createdAt       DateTime?         @default(now()) @map("created_at")
   updatedAt       DateTime?         @updatedAt @map("updated_at")
 
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
 
   @@map("appointments")

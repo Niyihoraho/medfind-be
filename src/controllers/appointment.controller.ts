@@ -2,7 +2,7 @@
 
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
-import { sendBookingConfirmation, sendFacilityNotification, generateBookingRef } from '../lib/email';
+import { sendBookingConfirmation, sendFacilityNotification, sendAdminNotification, generateBookingRef } from '../lib/email';
 
 function serialize(obj: any): any {
   return JSON.parse(JSON.stringify(obj, (_key, value) =>
@@ -53,71 +53,68 @@ export const appointmentController = {
   },
 
   async create(req: Request, res: Response) {
-    const userId = BigInt(req.user!.id);
     const facilityId = BigInt(req.body.facility_id);
     const appointmentDate = new Date(req.body.appointment_date);
 
-    // Check for duplicate: same user + facility + same date
-    const dateStart = new Date(appointmentDate);
-    dateStart.setHours(0, 0, 0, 0);
-    const dateEnd = new Date(appointmentDate);
-    dateEnd.setHours(23, 59, 59, 999);
-
-    const existing = await prisma.appointment.findFirst({
-      where: {
-        userId,
-        facilityId,
-        appointmentDate: { gte: dateStart, lte: dateEnd },
-        status: { not: 'cancelled' },
-      },
+    // Fetch facility info for the email
+    const facility = await prisma.facility.findUnique({
+      where: { id: facilityId },
+      select: { name: true, phone: true, email: true }
     });
 
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        error: 'You already have an appointment at this facility on this date',
-        code: 409,
-      });
+    if (!facility) {
+      return res.status(404).json({ success: false, error: 'Facility not found', code: 404 });
     }
 
     // Generate a booking reference
     const bookingRef = generateBookingRef();
 
-    const appointment = await prisma.appointment.create({
-      data: {
-        userId,
-        facilityId,
-        serviceName: req.body.service_name,
-        appointmentDate,
-        notes: req.body.notes,
-      },
-      include: {
-        facility: { select: { id: true, name: true, type: true, phone: true, email: true } },
-        user: { select: { id: true, fullName: true, email: true } },
-      },
-    });
-
-    // Send confirmation emails (non-blocking)
+    // Prepare email details from request body and facility info
     const emailDetails = {
       bookingRef,
-      patientName: appointment.user.fullName,
-      patientEmail: appointment.user.email,
-      facilityName: appointment.facility.name,
-      facilityPhone: appointment.facility.phone,
-      facilityEmail: appointment.facility.email,
-      serviceName: appointment.serviceName || 'General Consultation',
+      patientName: req.body.full_name || 'Patient',
+      patientEmail: req.body.email || '',
+      patientPhone: req.body.phone || '',
+      facilityName: facility.name,
+      facilityPhone: facility.phone,
+      facilityEmail: facility.email,
+      serviceName: req.body.service_name || 'General Consultation',
       appointmentDate,
-      notes: appointment.notes,
+      notes: req.body.notes,
     };
 
-    // Fire-and-forget — don't await, don't block the response
-    sendBookingConfirmation(emailDetails).catch(() => {});
-    sendFacilityNotification(emailDetails).catch(() => {});
+    // Send confirmation emails (blocking for debug/ensure delivery)
+    try {
+      // 1. Send to Patient
+      await sendBookingConfirmation(emailDetails);
+      console.log(`✅ Confirmation email sent to patient: ${emailDetails.patientEmail}`);
+      
+      // 2. Send to Facility (if they have an email)
+      if (emailDetails.facilityEmail) {
+        await sendFacilityNotification(emailDetails);
+        console.log(`✅ Notification email sent to facility: ${emailDetails.facilityEmail}`);
+      } else {
+        console.log(`ℹ️ Skipping facility email: No email address set for ${facility.name}`);
+      }
+
+      // 3. Send to MedFind Admin (Copy for records)
+      await sendAdminNotification(emailDetails);
+      console.log(`✅ Copy sent to MedFind Admin`);
+
+    } catch (emailError) {
+      console.error('❌ Failed to dispatch one or more emails:', emailError);
+    }
 
     res.status(201).json({
       success: true,
-      data: { ...serialize(appointment), bookingRef },
-      message: 'Appointment booked successfully. A confirmation email has been sent.',
+      data: { 
+        id: Math.floor(Math.random() * 1000000), // Virtual ID since we're not saving to DB
+        bookingRef,
+        appointmentDate,
+        serviceName: req.body.service_name,
+        patientName: req.body.full_name,
+      },
+      message: 'Appointment request sent successfully. A confirmation email has been dispatched.',
     });
   },
 

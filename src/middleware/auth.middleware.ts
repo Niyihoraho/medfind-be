@@ -29,3 +29,18 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     return res.status(401).json({ success: false, error: 'Unauthorized — invalid token', code: 401 });
   }
 };
+
+export const optionalAuthenticate = async (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(' ')[1];
+
+  if (!token) return next();
+
+  try {
+    const payload = verifyToken(token);
+    req.user = payload;
+    next();
+  } catch {
+    next();
+  }
+};
